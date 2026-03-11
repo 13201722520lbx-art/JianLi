@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>李秉宪 - AI产品经理</title>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        #root {
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 40px;
+            perspective: 1000px;
+        }
+
+        .avatar {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255,255,255,0.2);
+            box-shadow: 0 0 80px rgba(255,255,255,0.4);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .avatar:hover {
+            transform: scale(1.1) rotateY(10deg);
+            box-shadow: 0 0 120px rgba(255,255,255,0.6);
+        }
+
+        .name {
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, #666 50%, #fff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: shine 3s linear infinite, fadeInUp 1s ease-out;
+            letter-spacing: 2px;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .title {
+            font-size: 1.8rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out 0.2s both;
+            letter-spacing: 1px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 50px;
+            justify-content: center;
+            margin-top: 40px;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px 30px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+            margin-top: 5px;
+        }
+
+        .contact-info {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 30px;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.05);
+        }
+
+        .section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 80px;
+            background: linear-gradient(135deg, #fff 0%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+
+        .info-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .info-card:hover::before {
+            left: 100%;
+        }
+
+        .info-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .highlight-box {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 25px;
+            padding: 50px;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .highlight-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .highlight-grid {
+            display: grid;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .highlight-item {
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-left: 3px solid #fff;
+            border-radius: 10px;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.8;
+            transition: all 0.3s ease;
+        }
+
+        .highlight-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(10px);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 50px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #fff 0%, #333 100%);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: slideIn 0.6s ease-out forwards;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -56px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 30px rgba(255,255,255,0.8);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(255,255,255,0.8);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(255,255,255,1);
+            }
+        }
+
+        .timeline-content {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.4s ease;
+        }
+
+        .timeline-content:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateX(15px);
+            box-shadow: 0 10px 40px rgba(255,255,255,0.15);
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .timeline-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+            padding: 5px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+        }
+
+        .timeline-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+        }
+
+        .achievement-tag {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-tag:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .skill-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 35px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .skill-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+            box-shadow: 0 15px 50px rgba(255,255,255,0.2);
+        }
+
+        .skill-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .skill-tag {
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 25px;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.85);
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .skill-tag:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 18px 50px;
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(255,255,255,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .cta-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(255,255,255,0.5);
+        }
+
+        .education-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 40px;
+            transition: all 0.4s ease;
+        }
+
+        .education-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(255,255,255,0.2);
+        }
+
+        .education-title {
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .education-meta {
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .awards-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .award-item {
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-left: 3px solid #fff;
+            border-radius: 10px;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.8;
+            transition: all 0.3s ease;
+        }
+
+        .award-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(10px);
+        }
+
+        @media (max-width: 768px) {
+            .name {
+                font-size: 3rem;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .timeline {
+                padding-left: 30px;
+            }
+
+            .timeline-dot {
+                left: -38px;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div id="root"></div>
+
+    <script>
+        // tsParticles 高级粒子特效
+        tsParticles.load("three-canvas", {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#ffffff" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1 } },
+                size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.1 } },
+                line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "grab" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                },
+                modes: {
+                    grab: { distance: 140, line_linked: { opacity: 1 } },
+                    push: { particles_nb: 4 }
+                }
+            },
+            retina_detect: true
+        });
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            return (
+                <div className="container">
+                    <section className="hero">
+                        <div className="hero-content">
+                            <div className="avatar-wrapper">
+                                <img src="ziliao/李秉宪证件照.jpg" alt="李秉宪" className="avatar" />
+                            </div>
+                            <h1 className="name">李秉宪</h1>
+                            <p className="title">AIGC产品 / AI产品</p>
+                            <div className="stats">
+                                <div className="stat-item">
+                                    <div className="stat-value">21</div>
+                                    <div className="stat-label">岁</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-value">8+</div>
+                                    <div className="stat-label">月实习经验</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-value">2026</div>
+                                    <div className="stat-label">届应届生</div>
+                                </div>
+                            </div>
+                            <div className="contact-info">
+                                <div className="contact-item">邮箱📧 1511310907@qq.com</div>
+                                <div className="contact-item">微信💬 l13201722520</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="section">
+                        <h2 className="section-title">基本信息</h2>
+                        <div className="info-grid">
+                            <div className="info-card">
+                                <div className="info-label">政治面貌</div>
+                                <div className="info-value">党员</div>
+                            </div>
+                            <div className="info-card">
+                                <div className="info-label">到岗时间</div>
+                                <div className="info-value">随时</div>
+                            </div>
+                            <div className="info-card">
+                                <div className="info-label">学校</div>
+                                <div className="info-value">浙江传媒学院</div>
+                            </div>
+                            <div className="info-card">
+                                <div className="info-label">专业</div>
+                                <div className="info-value">网络工程</div>
+                            </div>
+                        </div>
+
+                        <div className="highlight-box">
+                            <h3 className="highlight-title">核心竞争力</h3>
+                            <div className="highlight-grid">
+                                <div className="highlight-item">
+                                    <strong>AI工作流产品化专家</strong><br/>
+                                    具备从0到1搭建AI工作流的完整经验，能将复杂技术转化为可落地的业务方案
+                                </div>
+                                <div className="highlight-item">
+                                    <strong>技术+业务双驱动</strong><br/>
+                                    既能动手搭建ComfyUI工作流、训练Lora模型、AI开发应用，也能站在产品视角评估ROI与优先级
+                                </div>
+                                <div className="highlight-item">
+                                    <strong>8个月实习经验</strong><br/>
+                                    半年AI漫剧业务线实战经验，入职无需培训即可直接产出
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{textAlign: 'center'}}>
+                            <a href="https://vcnwqimrnc0s.feishu.cn/wiki/G0nIwXh82irG6yk7XCRc8B3Inmh?from=from_copylink" target="_blank" className="cta-button">
+                                <span style={{position: 'relative', zIndex: 1}}>查看在线作品集</span>
+                            </a>
+                        </div>
+                    </section>
+
+                    <section className="section">
+                        <h2 className="section-title">工作经验</h2>
+                        <div className="timeline">
+                            <div className="timeline-item">
+                                <div className="timeline-dot"></div>
+                                <div className="timeline-content">
+                                    <div className="timeline-header">
+                                        <div>
+                                            <div className="timeline-title">杭州塔尔西斯文化有限公司</div>
+                                            <div className="timeline-subtitle">AIGC技术实习生</div>
+                                        </div>
+                                        <div className="timeline-date">2025.05 - 2025.06</div>
+                                    </div>
+                                    <div style={{marginBottom: '15px'}}>
+                                        <span className="achievement-tag">Lora模型训练</span>
+                                        <span className="achievement-tag">ComfyUI工作流</span>
+                                        <span className="achievement-tag">人物一致性</span>
+                                        <span className="achievement-tag">线稿上色</span>
+                                    </div>
+                                    <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8'}}>
+                                        负责Lora模型训练与ComfyUI工作流搭建，主攻人物一致性Lora和线稿上色一致性Lora方向。
+                                        通过自训练模型解决漫画制作中的角色一致性和风格统一问题，为后续AI内容生产积累了扎实的技术基础。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="timeline-item">
+                                <div className="timeline-dot"></div>
+                                <div className="timeline-content">
+                                    <div className="timeline-header">
+                                        <div>
+                                            <div className="timeline-title">杭州影咖信息科技有限公司</div>
+                                            <div className="timeline-subtitle">AI漫剧制作方向负责人</div>
+                                        </div>
+                                        <div className="timeline-date">2025.06 - 2025.12</div>
+                                    </div>
+                                    <div style={{marginBottom: '15px'}}>
+                                        <span className="achievement-tag">0到1搭建AI短剧生产线</span>
+                                        <span className="achievement-tag">ComfyUI工作流</span>
+                                        <span className="achievement-tag">Lora模型训练</span>
+                                        <span className="achievement-tag">AI Agent构建</span>
+                                        <span className="achievement-tag">培训40+员工</span>
+                                    </div>
+                                    <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8', marginBottom: '12px'}}>
+                                        <strong>Lora模型训练师：</strong>通过自训练Lora模型确保人物一致性，解决传统画师产能低、成本高的痛点。
+                                    </p>
+                                    <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8', marginBottom: '12px'}}>
+                                        <strong>工作流产品化：</strong>针对业务需求设计ComfyUI工作流，实现批量化生产，大幅提升制作效率。
+                                    </p>
+                                    <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8', marginBottom: '12px'}}>
+                                        <strong>AI制作方向负责人：</strong>持续调研最新AIGC工具（Seedance、Keling等），快速测试并评估业务适配性。
+                                        编写操作文档，完成40余名员工的AI工具培训。截至2026年1月，公司AI漫剧业务流程均由本人参与规划制定。
+                                    </p>
+                                    <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8'}}>
+                                        <strong>AI Agent智能体搭建：</strong>针对编剧与分镜环节，通过Prompt优化构建专属AI Agent，实现部分内容生产自动化。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="timeline-item">
+                                <div className="timeline-dot"></div>
+                                <div className="timeline-content">
+                                    <div className="timeline-header">
+                                        <div>
+                                            <div className="timeline-title">囚生计小说改 短剧项目（校企合作）</div>
+                                            <div className="timeline-subtitle">制作总负责人 & 产品Owner</div>
+                                        </div>
+                                        <div className="timeline-date">2026.1 - 2026.02</div>
+                                    </div>
+                                    <div style={{marginBottom: '15px'}}>
+                                        <span className="achievement-tag">15人团队管理</span>
+                                        <span className="achievement-tag">Seedance</span>
+                                        <span className="achievement-tag">Sora</span>
+                                        <span className="achievement-tag">Vidu</span>
+                                    </div>
+                                    <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8'}}>
+                                        受上海扶摇玖翼文化传媒有限公司委托，统筹15人团队完成AI短剧全流程制作与交付。
+                                        灵活运用最新的AI视频生成模型，实现高质量的影视化呈现。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="timeline-item">
+                                <div className="timeline-dot"></div>
+                                <div className="timeline-content">
+                                    <div className="timeline-header">
+                                        <div>
+                                            <div className="timeline-title">个人独立AI原生应用开发</div>
+                                            <div className="timeline-subtitle">全栈产品经理</div>
+                                        </div>
+                                        <div className="timeline-date">2026.1</div>
+                                    </div>
+                                    <div style={{marginBottom: '15px'}}>
+                                        <span className="achievement-tag">AI黑客松</span>
+                                        <span className="achievement-tag">VibeCoding</span>
+                                        <span className="achievement-tag">Cursor</span>
+                                        <span className="achievement-tag">ClaudeCode</span>
+                                    </div>
+                                    <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8'}}>
+                                        独立策划并设计"拍照背韩语"App，通过VibeCoding模式单人完成前后端开发与上线测试。
+                                        实现"拍照识别→生成场景化例句→智能记忆推送"的完整学习闭环。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="timeline-item">
+                                <div className="timeline-dot"></div>
+                                <div className="timeline-content">
+                                    <div className="timeline-header">
+                                        <div>
+                                            <div className="timeline-title">AI内容生态工作室（筹）</div>
+                                            <div className="timeline-subtitle">联合创始人 & AI产品负责人</div>
+                                        </div>
+                                        <div className="timeline-date">2026.01 - 至今</div>
+                                    </div>
+                                    <div style={{marginBottom: '15px'}}>
+                                        <span className="achievement-tag">创业项目</span>
+                                        <span className="achievement-tag">AI技术选型</span>
+                                        <span className="achievement-tag">工作流产品化</span>
+                                    </div>
+                                    <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8'}}>
+                                        与资深记者、小说作者组成"叙事+网感+AI技术"互补型创作者团队。
+                                        负责AI技术选型与工作流产品化，将文字剧本高效转化为高质量AI视频内容。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="section">
+                        <h2 className="section-title">专业技能</h2>
+                        <div className="skills-grid">
+                            <div className="skill-card">
+                                <h3 className="skill-title">AI产品核心能力</h3>
+                                <div className="skill-tags">
+                                    <span className="skill-tag">Prompt Engineering</span>
+                                    <span className="skill-tag">大模型应用</span>
+                                    <span className="skill-tag">AI Agent</span>
+                                    <span className="skill-tag">Gemini</span>
+                                    <span className="skill-tag">Claude</span>
+                                    <span className="skill-tag">Coze</span>
+                                    <span className="skill-tag">RICE模型</span>
+                                    <span className="skill-tag">数据驱动迭代</span>
+                                </div>
+                            </div>
+
+                            <div className="skill-card">
+                                <h3 className="skill-title">AIGC图像生成</h3>
+                                <div className="skill-tags">
+                                    <span className="skill-tag">ComfyUI</span>
+                                    <span className="skill-tag">Lora训练</span>
+                                    <span className="skill-tag">Stable Diffusion</span>
+                                    <span className="skill-tag">Midjourney</span>
+                                    <span className="skill-tag">QwenImage</span>
+                                    <span className="skill-tag">ZImage</span>
+                                    <span className="skill-tag">Seedream 4.0</span>
+                                    <span className="skill-tag">NanoBanan</span>
+                                </div>
+                            </div>
+
+                            <div className="skill-card">
+                                <h3 className="skill-title">AIGC视频生成</h3>
+                                <div className="skill-tags">
+                                    <span className="skill-tag">Keling</span>
+                                    <span className="skill-tag">Seedance</span>
+                                    <span className="skill-tag">VIDU</span>
+                                    <span className="skill-tag">Wan</span>
+                                    <span className="skill-tag">Sora</span>
+                                </div>
+                            </div>
+
+                            <div className="skill-card">
+                                <h3 className="skill-title">AI辅助开发</h3>
+                                <div className="skill-tags">
+                                    <span className="skill-tag">VibeCoding</span>
+                                    <span className="skill-tag">Cursor</span>
+                                    <span className="skill-tag">ClaudeCode</span>
+                                    <span className="skill-tag">AgentTeams</span>
+                                    <span className="skill-tag">Trae</span>
+                                    <span className="skill-tag">Python</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="section">
+                        <h2 className="section-title">教育背景</h2>
+                        <div className="education-card">
+                            <h3 className="education-title">浙江传媒学院（本科）</h3>
+                            <p className="education-meta">2022.09 - 2026.06 | 网络工程专业</p>
+
+                            <h4 style={{color: '#fff', marginTop: '30px', marginBottom: '20px', fontSize: '1.3rem'}}>核心奖项</h4>
+                            <div className="awards-grid">
+                                <div className="award-item">
+                                    <strong>2024年 互联网+全国大学生创新创业大赛 全国铜奖</strong><br/>
+                                </div>
+                                <div className="award-item">
+                                    <strong>2024-2025年 全国大学生国家级创新创业项目 优秀结项</strong><br/>
+                                    "数字化AI皮影动画平台" - 主导产品功能规划与AIGC图像工作流搭建，产出软著1篇，论文1篇
+                                </div>
+                            </div>
+
+                            <h4 style={{color: '#fff', marginTop: '30px', marginBottom: '15px', fontSize: '1.2rem'}}>专业优势</h4>
+                            <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: '1.8'}}>
+                                兼具传媒院校的强内容基因审美与工科专业的系统化计算机底层思维
+                            </p>
+                        </div>
+                    </section>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
